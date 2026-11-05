@@ -1,0 +1,45 @@
+# ================================================================
+#  Donnees ADNI — NE JAMAIS versionner le CONTENU
+#  (interdit par l'accord d'utilisation des donnees ADNI)
+#  On garde seulement la structure des dossiers (via .gitkeep).
+# ================================================================
+data/*
+!data/.gitkeep
+outputs/*
+!outputs/.gitkeep
+
+# Environnement Python / virtualenv
+.venv/
+venv/
+env/
+__pycache__/
+*.pyc
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Securite supplementaire : tout fichier de donnees, ou qu'il soit
+*.csv
+*.tsv
+*.xlsx
+*.xls
+*.dcm
+*.nii
+*.nii.gz
+*.npy
+*.npz
+*.json
+*.txt
+
+# Systeme
+Thumbs.db
+.DS_Store
+desktop.ini
+
+# ================================================================
+#  Exceptions : fichiers du depot que l'on GARDE malgre les regles ci-dessus
+# ================================================================
+!requirements.txt
+!.gitignore
+!README.md
+
