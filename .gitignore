@@ -1,45 +1,59 @@
-# ================================================================
-#  Donnees ADNI — NE JAMAIS versionner le CONTENU
-#  (interdit par l'accord d'utilisation des donnees ADNI)
-#  On garde seulement la structure des dossiers (via .gitkeep).
-# ================================================================
-data/*
-!data/.gitkeep
-outputs/*
-!outputs/.gitkeep
+# Données et résultats locaux
+/data/
+/outputs/
 
-# Environnement Python / virtualenv
+# Environnements Python
 .venv/
 venv/
 env/
+
+# Fichiers temporaires Python et Jupyter
 __pycache__/
-*.pyc
-
-# Jupyter
+*.py[cod]
 .ipynb_checkpoints/
+.pytest_cache/
 
-# Securite supplementaire : tout fichier de donnees, ou qu'il soit
+# Secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# Données et images médicales, même hors de data/
 *.csv
 *.tsv
-*.xlsx
 *.xls
+*.xlsx
 *.dcm
+*.DCM
 *.nii
 *.nii.gz
+*.img
+*.hdr
 *.npy
 *.npz
-*.json
-*.txt
+*.parquet
+*.h5
+*.hdf5
 
-# Systeme
+# Archives et modèles entraînés
+*.zip
+*.7z
+*.rar
+*.tar
+*.tar.gz
+*.pkl
+*.joblib
+*.pt
+*.pth
+*.ckpt
+
+# Configuration locale et fichiers système
+.vscode/
+.idea/
 Thumbs.db
 .DS_Store
-desktop.ini
 
-# ================================================================
-#  Exceptions : fichiers du depot que l'on GARDE malgre les regles ci-dessus
-# ================================================================
-!requirements.txt
-!.gitignore
-!README.md
-
+# Aucun fichier de maintien des dossiers
+.gitkeep
