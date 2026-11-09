@@ -1,10 +1,10 @@
 """Configuration centrale des chemins du projet Alzheimer.
 
-A placer dans E:\\Projet_Alzheimer\\configs\\config_projet.py
-Utilisation dans un notebook :
+A placer dans <racine du projet>\\configs\\config_projet.py
+Utilisation dans un notebook (lance depuis le dossier notebooks/) :
 
     import sys
-    sys.path.append(r"E:\\Projet_Alzheimer\\configs")
+    sys.path.append(r"..\\configs")
     from config_projet import C
 
 Avantage : plus aucun chemin horodate n'est recopie a la main dans les
@@ -17,7 +17,9 @@ import pandas as pd
 
 class Config:
     def __init__(self):
-        self.ROOT = Path(r"E:\Projet_Alzheimer")
+        # Racine = dossier parent de configs/ : marche sur n'importe quel PC
+        # (E:\Projet_Alzheimer, C:\Users\...\alzheimer, ...) sans rien modifier.
+        self.ROOT = Path(__file__).resolve().parents[1]
         self.DATA = self.ROOT / "data"
         self.TABLES = self.DATA / "02_Tables_originales"
         self.MANIFESTES = self.DATA / "05_Manifestes"
