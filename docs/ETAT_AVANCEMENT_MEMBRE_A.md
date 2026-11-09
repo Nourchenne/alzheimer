@@ -21,21 +21,29 @@ Après : 85 patients « à risque » (pas encore déments à la date de l'image,
 | Fusion tableau + imagerie | 0,717 | 0,711 |
 | RQ3 : sans l'imagerie au test | 0,731 | 0,736 |
 | RQ3 : sans le tableau au test | 0,485 | 0,624 |
-| CNN 3D IRM seule (notebook 14) | 0,541 | **0,714 ± 0,103** |
-| CNN 3D IRM + PET | 0,508 | 0,637 ± 0,084 |
-| CNN 3D IRM + PET + tableau | 0,635 | 0,669 ± 0,119 |
-| CNN 3D PET seule | 0,544 | 0,491 ± 0,086 |
+| CNN 3D IRM seule, moyenne de 5 graines, 40 époques (notebook 14) | 0,541 (1 essai) | 0,630 ± 0,050 (0,58 à 0,70) |
+| CNN 3D IRM seule, 5 graines, arrêt anticipé | — | 0,536 ± 0,020 |
+| CNN 3D IRM + PET + tableau, 5 graines, 40 époques | 0,635 (1 essai) | 0,649 ± 0,041 |
+| CNN 3D IRM + PET + tableau, 5 graines, arrêt anticipé | 0,644 (1 essai) | 0,627 ± 0,047 |
+| CNN 3D PET seule, arrêt anticipé (1 essai) | 0,569 ± 0,056 | 0,414 ± 0,231 |
+| CNN 3D IRM + PET, arrêt anticipé (1 essai) | 0,487 ± 0,066 | 0,503 ± 0,179 |
 
-Notebook 15 (images alignées, 85 patients) : meilleure représentation d'image seule = PCA IRM 20 composantes + régression
-logistique (0,671) ; PCA PET 10 composantes 0,629 ; anciennes 5 statistiques 0,47 (RF) et 0,44 (LR).
-Tabulaire + régions IRM/PET (RF) 0,711 ; tabulaire + PCA IRM+PET 10 composantes (LR) 0,697 ; tabulaire seul 0,709 / 0,700.
+Le premier score du CNN sur l'IRM (0,714, publié le 9 nov. au soir) était un coup de chance : relancé avec 5 graines,
+le même modèle donne 0,58 à 0,70. Le même code a aussi donné deux scores différents sur deux exécutions (calcul GPU non
+reproductible). L'arrêt anticipé de la fiche dégrade l'IRM seule (validation sur 14 patients, trop peu).
+
+Notebook 15 (images alignées, 85 patients, PCA à 10, 20, 30 et 50 composantes) : la PCA varie sans logique avec k
+(IRM + régression logistique : 0,600 / 0,671 / 0,694 / 0,609) ; PCA IRM+PET 50 composantes + RF 0,630 ; anciennes
+5 statistiques 0,47 (RF) et 0,44 (LR). Tabulaire + régions IRM/PET (RF) 0,711 ; tabulaire + PCA IRM+PET 50 composantes
+(RF) 0,709 ; tabulaire seul 0,709 / 0,700.
 
 ### Lecture honnête
 - L'alignement a rendu les images **informatives** : avant on était au hasard, maintenant 0,6 à 0,7.
 - La fusion **n'améliore pas** le tableau (+0,002) : RQ1 = pas de gain mesurable.
 - Le tableau baisse de 0,741 à 0,709 : c'est la vraie performance, la cible d'avant contenait des patients déjà aggravés.
 - Avec 85 patients, l'écart-type entre plis est de 0,05 à 0,15 : un écart inférieur à ~0,05 n'est pas distinguable du bruit.
-  Le CNN IRM seule (0,714) est le meilleur de 4 configurations testées : score optimiste, à ne pas surinterpréter.
+- Le CNN 3D est instable (voir plus haut) : sur 85 patients il n'est pas meilleur que les mesures par région (0,62) et reste
+  sous le tableau (0,71). Aucun score de CNN isolé n'est fiable ; rapporter la moyenne sur plusieurs graines.
 - RQ3 : le modèle résiste à l'absence d'imagerie, et l'imagerie seule garde un signal (0,62) alors qu'avant elle n'en avait aucun.
 
 ## Ce qui a été fait
@@ -57,14 +65,17 @@ Tabulaire + régions IRM/PET (RF) 0,711 ; tabulaire + PCA IRM+PET 10 composantes
 
 ## Ce qui reste à faire
 
-1. Envoyer à Nourchene : `docs/Document_pour_Nourchene.docx` et les fichiers de résultats (RQ1_comparaison, RQ3_robustesse,
-   importance_fusion, resultats_CNN, RQ1_representations).
+1. Envoyer à Nourchene : `docs/Document_pour_Nourchene.docx` et `outputs/livrables_membre_A.zip` (dossier
+   `outputs/livrables_membre_A/`, avec LISEZMOI ; ignoré par git, aucun identifiant de patient).
 2. Décisions communes : garder ou non les 27 patients déjà déments ; appliquer la nouvelle cible aux 359 (relancer ses
    notebooks 08, 11, 12 pour rester comparables) ; qui relance le notebook 07 pour l'âge ; qui pousse les chemins sur git.
 3. Phase 4 : tableau comparatif unique, choix du modèle final (critères : AUC, stabilité, réponse aux RQ, simplicité),
    présentation avec une conclusion par RQ et la partie pipeline Big Data (Nourchene : notebook 13).
-4. Pistes si le temps le permet : plusieurs graines pour le CNN (stabilité), répéter la validation croisée,
-   mesurer des régions plus fines, élargir au-delà de 112 patients (le même alignement marcherait pour d'autres).
+4. Pistes si le temps le permet : répéter la validation croisée pour tous les modèles, mesurer des régions plus fines,
+   élargir au-delà de 112 patients (le même alignement marcherait pour d'autres).
+5. Mise en conformité avec la fiche faite le 9 nov. au soir : écart-type et 4 métriques (notebooks 10 et 14), arrêt anticipé
+   du CNN, PCA jusqu'à 50 composantes. L'étude de stabilité du CNN (5 graines) a été faite par un script non versionné ;
+   ses résultats sont dans `livrables_membre_A/3_stabilite_CNN/`.
 
 ## Attention : fichiers de résultats
 
