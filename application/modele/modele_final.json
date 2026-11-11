@@ -1,0 +1,101 @@
+{
+  "nom": "Prediction du risque d'aggravation cognitive a deux ans",
+  "date_entrainement": "2026-11-11T13:06:08",
+  "configuration": {
+    "visites": 2,
+    "representation": "statique",
+    "modele": "Regression logistique"
+  },
+  "variables": [
+    "code_dx",
+    "MMSE",
+    "CDR_global",
+    "CDR_SB",
+    "ADAS13",
+    "FAQ",
+    "sexe",
+    "education",
+    "APOE_e4",
+    "age"
+  ],
+  "seuil_alerte": 0.385,
+  "entrainement": {
+    "participants": 771,
+    "aggravations": 111,
+    "taux": 0.144
+  },
+  "performance_test_independant": {
+    "participants": 187,
+    "aggravations": 23,
+    "roc_auc": 0.898,
+    "IC95": [
+      0.838,
+      0.944
+    ],
+    "seuil": 0.385,
+    "sensibilite": 0.87,
+    "specificite": 0.774,
+    "VPP": 0.351,
+    "VPN": 0.977,
+    "exactitude equilibree": 0.822
+  },
+  "reperes_variables": {
+    "code_dx": {
+      "mediane": 2.0,
+      "min": 1.0,
+      "max": 2.0
+    },
+    "MMSE": {
+      "mediane": 29.0,
+      "min": 19.0,
+      "max": 30.0
+    },
+    "CDR_global": {
+      "mediane": 0.5,
+      "min": -1.0,
+      "max": 1.0
+    },
+    "CDR_SB": {
+      "mediane": 0.5,
+      "min": 0.0,
+      "max": 6.0
+    },
+    "ADAS13": {
+      "mediane": 11.0,
+      "min": 0.0,
+      "max": 37.67
+    },
+    "FAQ": {
+      "mediane": 0.0,
+      "min": 0.0,
+      "max": 24.0
+    },
+    "sexe": {
+      "mediane": 2.0,
+      "min": 1.0,
+      "max": 2.0
+    },
+    "education": {
+      "mediane": 16.0,
+      "min": 8.0,
+      "max": 20.0
+    },
+    "APOE_e4": {
+      "mediane": 0.0,
+      "min": 0.0,
+      "max": 2.0
+    },
+    "age": {
+      "mediane": 72.0,
+      "min": 55.0,
+      "max": 91.0
+    }
+  },
+  "cible": "diagnostic a environ deux ans superieur a celui de la visite de reference",
+  "versions": {
+    "python": "3.10.11",
+    "pandas": "2.3.3",
+    "numpy": "2.2.6",
+    "scikit_learn": "1.7.2"
+  }
+}

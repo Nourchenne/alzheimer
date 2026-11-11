@@ -57,3 +57,6 @@ Thumbs.db
 
 # Aucun fichier de maintien des dossiers
 .gitkeep
+
+__pycache__/
+application/modele/*.joblib

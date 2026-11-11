@@ -1,0 +1,108 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 430" role="img"
+     aria-label="Suivi de l'évolution cognitive au fil des consultations">
+  <defs>
+    <linearGradient id="fondDoux" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#D7EEEC"/>
+      <stop offset="1" stop-color="#EDF6FB"/>
+    </linearGradient>
+    <linearGradient id="tealPlein" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#14A49A"/>
+      <stop offset="1" stop-color="#0A6E68"/>
+    </linearGradient>
+    <linearGradient id="sousCourbe" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#14A49A" stop-opacity=".22"/>
+      <stop offset="1" stop-color="#14A49A" stop-opacity="0"/>
+    </linearGradient>
+    <filter id="ombrePortee" x="-12%" y="-12%" width="124%" height="130%">
+      <feDropShadow dx="0" dy="10" stdDeviation="14" flood-color="#16304F" flood-opacity=".13"/>
+    </filter>
+    <filter id="ombreLegere" x="-25%" y="-25%" width="150%" height="160%">
+      <feDropShadow dx="0" dy="5" stdDeviation="7" flood-color="#16304F" flood-opacity=".15"/>
+    </filter>
+  </defs>
+
+  <!-- fond organique -->
+  <path d="M96 36c104-34 232-26 296 44s48 196-26 258-214 66-282 8S-8 70 96 36z"
+        fill="url(#fondDoux)"/>
+  <circle cx="452" cy="86" r="9" fill="#14A49A" opacity=".3"/>
+  <circle cx="474" cy="132" r="5" fill="#14A49A" opacity=".2"/>
+  <circle cx="44" cy="286" r="7" fill="#16304F" opacity=".12"/>
+
+  <!-- profil de tête -->
+  <g transform="translate(52 96)">
+    <path d="M118 16c-50-14-104 14-114 62-4 20-18 28-26 42-9 16 0 30 18 34 8 2 11 7 10 15-3 26 10 40 36 42 9 1 13 5 13 14 1 26 14 38 40 38h26"
+          fill="#fff" stroke="url(#tealPlein)" stroke-width="7"
+          stroke-linecap="round" stroke-linejoin="round"/>
+    <!-- réseau de nœuds à l'intérieur -->
+    <g stroke="#9ED8D3" stroke-width="2.6" fill="none">
+      <path d="M44 92l26-22 30 14 26-24"/>
+      <path d="M48 124l28 10 28-20 26 8"/>
+      <path d="M70 70v64M100 84v50M126 66v68"/>
+    </g>
+    <g fill="#14A49A">
+      <circle cx="44" cy="92" r="5.4"/><circle cx="70" cy="70" r="5.4"/>
+      <circle cx="100" cy="84" r="5.4"/><circle cx="126" cy="66" r="5.4"/>
+      <circle cx="48" cy="124" r="4.6"/><circle cx="76" cy="134" r="4.6"/>
+      <circle cx="104" cy="114" r="4.6"/><circle cx="130" cy="122" r="4.6"/>
+    </g>
+  </g>
+
+  <!-- carte : courbe de suivi -->
+  <g filter="url(#ombrePortee)">
+    <rect x="196" y="208" width="286" height="178" rx="18" fill="#fff"/>
+  </g>
+  <text x="222" y="244" font-family="Poppins,Segoe UI,Arial,sans-serif"
+        font-size="14" font-weight="600" fill="#16304F">Évolution du suivi</text>
+  <text x="222" y="264" font-family="Poppins,Segoe UI,Arial,sans-serif"
+        font-size="11.5" fill="#73869B">Consultations successives</text>
+
+  <!-- grille -->
+  <g stroke="#E8EEF4" stroke-width="1.4">
+    <path d="M222 358h236M222 330h236M222 302h236"/>
+  </g>
+
+  <!-- aire + courbe -->
+  <path d="M228 346 L294 332 L360 312 L426 286 L450 278 L450 358 L228 358 Z"
+        fill="url(#sousCourbe)"/>
+  <path d="M228 346 L294 332 L360 312 L426 286" fill="none"
+        stroke="url(#tealPlein)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M426 286 L458 274" fill="none" stroke="#14A49A" stroke-width="4"
+        stroke-linecap="round" stroke-dasharray="2 8"/>
+
+  <g fill="#fff" stroke="#0A6E68" stroke-width="3.4">
+    <circle cx="228" cy="346" r="6"/>
+    <circle cx="294" cy="332" r="6"/>
+    <circle cx="360" cy="312" r="6"/>
+  </g>
+  <circle cx="426" cy="286" r="8" fill="#0A6E68"/>
+  <circle cx="426" cy="286" r="15" fill="#0A6E68" opacity=".16"/>
+
+  <!-- axes : repères temporels -->
+  <g font-family="Poppins,Segoe UI,Arial,sans-serif" font-size="10" fill="#9AACBE">
+    <text x="228" y="376" text-anchor="middle">V1</text>
+    <text x="294" y="376" text-anchor="middle">V2</text>
+    <text x="360" y="376" text-anchor="middle">V3</text>
+    <text x="430" y="376" text-anchor="middle">+24 m</text>
+  </g>
+
+  <!-- pastille de résultat -->
+  <g filter="url(#ombreLegere)">
+    <rect x="352" y="150" width="132" height="58" rx="15" fill="#16304F"/>
+  </g>
+  <text x="370" y="174" font-family="Poppins,Segoe UI,Arial,sans-serif"
+        font-size="10.5" fill="#9FBBD8" letter-spacing=".06em">RISQUE ESTIMÉ</text>
+  <text x="370" y="196" font-family="Poppins,Segoe UI,Arial,sans-serif"
+        font-size="19" font-weight="700" fill="#fff">à 24 mois</text>
+
+  <!-- pastille latérale -->
+  <g filter="url(#ombreLegere)">
+    <rect x="36" y="318" width="150" height="52" rx="14" fill="#fff"/>
+  </g>
+  <circle cx="64" cy="344" r="13" fill="#E8F5F4"/>
+  <path d="M58 344l4 4 8-8" fill="none" stroke="#0E9188" stroke-width="2.6"
+        stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="86" y="340" font-family="Poppins,Segoe UI,Arial,sans-serif"
+        font-size="11.5" font-weight="600" fill="#16304F">Compte rendu</text>
+  <text x="86" y="356" font-family="Poppins,Segoe UI,Arial,sans-serif"
+        font-size="11" fill="#73869B">de consultation</text>
+</svg>

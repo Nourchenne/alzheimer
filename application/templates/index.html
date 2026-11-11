@@ -1,0 +1,256 @@
+{% extends "base.html" %}
+{% block titre %}CogniSuivi — estimation du risque d'aggravation cognitive{% endblock %}
+
+{% block contenu %}
+
+<section class="banniere">
+  <div class="conteneur banniere__inner">
+    <div class="banniere__texte">
+      <p class="surtitre">Aide au suivi des troubles cognitifs</p>
+      <h1>Anticiper l'évolution<br><span>des troubles cognitifs</span></h1>
+      <p class="chapo">
+        À partir des résultats d'une consultation mémoire, cet outil estime la
+        probabilité que les troubles s'aggravent dans les deux années qui suivent.
+        Une information claire, pour mieux préparer le prochain rendez-vous médical.
+      </p>
+      <div class="banniere__actions">
+        <a class="bouton bouton--principal bouton--grand" href="#outil">Estimer un risque</a>
+        <a class="bouton bouton--creux bouton--grand" href="#demarche">Découvrir la démarche</a>
+      </div>
+      <ul class="banniere__points">
+        <li>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M12 7v5l3.5 2" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+          <div><strong>24 mois</strong><span>horizon de prédiction</span></div>
+        </li>
+        <li>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M13 2L5 14h6l-2 8 8-12h-6z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>
+          <div><strong>Immédiat</strong><span>résultat en un clic</span></div>
+        </li>
+      </ul>
+    </div>
+
+    <div class="banniere__visuel">
+      <img src="{{ url_for('static', filename='img/illustration-suivi.svg') }}"
+           alt="Représentation d'un suivi cognitif dans le temps">
+    </div>
+  </div>
+</section>
+
+<section class="etapes" id="demarche">
+  <div class="conteneur">
+    <div class="etapes__grille">
+      <article>
+        <h3>Recueillir</h3>
+        <p>Votre compte rendu de consultation suffit : les scores des tests de mémoire
+           y figurent déjà. Aucun examen supplémentaire n'est nécessaire.</p>
+        <a href="#outil">Saisir une évaluation</a>
+      </article>
+      <article>
+        <h3>Estimer</h3>
+        <p>Le calcul est immédiat. Il donne une probabilité, jamais une certitude,
+           et dit clairement si la situation mérite d'être surveillée.</p>
+        <a href="#outil">Lancer une estimation</a>
+      </article>
+      <article>
+        <h3>Comprendre</h3>
+        <p>Le résultat s'accompagne d'une explication en langage courant, pour savoir
+           ce qu'il signifie et ce qu'il ne signifie pas.</p>
+        <a href="#comprendre">En savoir plus</a>
+      </article>
+      <article>
+        <h3>En parler</h3>
+        <p>L'estimation sert de point de départ à la discussion avec votre médecin.
+           Elle ne décide rien à sa place.</p>
+        <a href="#comprendre">Comprendre la maladie</a>
+      </article>
+    </div>
+  </div>
+</section>
+
+<section class="outil" id="outil">
+  <div class="conteneur">
+    <div class="titre-section">
+      <p class="surtitre">Estimation</p>
+      <h2>Estimer votre risque</h2>
+      <p class="chapo chapo--centre">
+        Munissez-vous de votre dernier compte rendu de consultation et reportez
+        ci-dessous ce que vous y trouvez. <strong>Tout est facultatif</strong> : le calcul
+        fonctionne même si vous ne connaissez qu'une partie des réponses, et il gagne en
+        précision à mesure que vous en complétez.
+      </p>
+    </div>
+
+    {% if erreur_modele %}
+      <div class="alerte-technique">
+        <strong>Service momentanément indisponible.</strong> {{ erreur_modele }}
+      </div>
+    {% else %}
+    <div class="outil__grille">
+      <form class="formulaire" id="formulaire">
+        {% for groupe in groupes %}
+        <fieldset>
+          <legend>{{ groupe.titre }}</legend>
+          <div class="champs">
+            {% for champ in groupe.champs %}
+            <div class="champ">
+              <label for="c-{{ champ.nom }}">
+                {{ champ.libelle }}
+                {% if champ.unite %}<span class="champ__unite">{{ champ.unite }}</span>{% endif %}
+              </label>
+              {% if champ.choix %}
+                <select id="c-{{ champ.nom }}" name="{{ champ.nom }}">
+                  <option value="">Non renseigné</option>
+                  {% for valeur, libelle in champ.choix %}
+                  <option value="{{ valeur }}">{{ libelle }}</option>
+                  {% endfor %}
+                </select>
+              {% else %}
+                <input type="number" id="c-{{ champ.nom }}" name="{{ champ.nom }}"
+                       min="{{ champ.min }}" max="{{ champ.max }}" step="{{ champ.pas }}"
+                       placeholder="—" inputmode="decimal">
+              {% endif %}
+              {% if champ.aide %}<p class="champ__aide">{{ champ.aide }}</p>{% endif %}
+            </div>
+            {% endfor %}
+          </div>
+        </fieldset>
+        {% endfor %}
+
+        <div class="formulaire__actions">
+          <button type="submit" class="bouton bouton--principal bouton--grand">
+            Calculer l'estimation
+          </button>
+          <button type="reset" class="bouton bouton--texte">Réinitialiser</button>
+        </div>
+        <p class="formulaire__note">
+          Les valeurs saisies sont utilisées pour ce seul calcul et ne sont enregistrées
+          nulle part.
+        </p>
+      </form>
+
+      <aside class="resultat" id="resultat" aria-live="polite">
+        <div class="resultat__vide" id="resultat-vide">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 17l5-6 4 4 5-7 4 5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M3 21h18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+          <p>Le résultat de l'estimation s'affichera ici.</p>
+        </div>
+
+        <div class="resultat__contenu" id="resultat-contenu" hidden>
+          <p class="resultat__etiquette">Estimation du risque sur 2 ans</p>
+          <p class="resultat__valeur"><span id="resultat-pct">—</span><small>%</small></p>
+
+          <div class="jauge jauge--simple">
+            <div class="jauge__barre"><span id="jauge-remplissage"></span></div>
+          </div>
+
+          <p class="etiquette-niveau" id="resultat-niveau">—</p>
+          <p class="resultat__phrase" id="resultat-phrase"></p>
+
+          <p class="resultat__rappel">
+            Cette estimation est indicative. Elle ne pose aucun diagnostic et ne remplace
+            pas l'avis d'un médecin.
+          </p>
+        </div>
+
+        <div class="resultat__erreur" id="resultat-erreur" hidden></div>
+      </aside>
+    </div>
+    {% endif %}
+  </div>
+</section>
+
+<section class="reperes">
+  <div class="conteneur">
+    <div class="reperes__grille">
+      <div>
+        <strong>57 millions</strong>
+        <span>de personnes vivent avec une démence dans le monde</span>
+      </div>
+      <div>
+        <strong>Toutes les 3 s</strong>
+        <span>une nouvelle personne est touchée, soit 10 millions par an</span>
+      </div>
+      <div>
+        <strong>60 à 70 %</strong>
+        <span>des démences sont une maladie d'Alzheimer</span>
+      </div>
+      <div>
+        <strong>Jusqu'à 45 %</strong>
+        <span>des risques peuvent être évités ou retardés</span>
+      </div>
+    </div>
+    <p class="reperes__source">Source : Organisation mondiale de la Santé</p>
+  </div>
+</section>
+
+<section class="cartes" id="comprendre">
+  <div class="conteneur">
+    <div class="titre-section">
+      <p class="surtitre">S'informer</p>
+      <h2>Comprendre la maladie</h2>
+      <p class="chapo chapo--centre">
+        Quelques repères simples, pour savoir de quoi l'on parle et quand s'inquiéter.
+      </p>
+    </div>
+
+    <div class="cartes__grille">
+      <article class="carte">
+        <div class="carte__media carte__media--donnees">
+          <svg viewBox="0 0 64 64" aria-hidden="true">
+            <path d="M40 12c-10-4.5-21 1-23.5 10.5-.7 2.7-2.8 4-4.7 5.8-2.8 2.6-2.1 6.1 1.2 7.5 1.4.6 1.8 1.3 1.6 2.6-.5 4.6 1.8 7.2 6.3 7.6 1.4.2 1.9.7 1.9 2.1 0 4.6 2.3 6.9 7 6.9h6"
+                  fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+            <circle cx="26" cy="27" r="2.6" fill="currentColor"/>
+            <circle cx="36" cy="22" r="2.6" fill="currentColor"/>
+            <circle cx="33" cy="34" r="2.6" fill="currentColor"/>
+          </svg>
+        </div>
+        <div class="carte__corps">
+          <h3>Qu'est-ce que c'est&nbsp;?</h3>
+          <p>La maladie d'Alzheimer abîme peu à peu les cellules du cerveau, en touchant
+             d'abord les zones de la mémoire. C'est la cause la plus fréquente de démence.
+             Elle n'est pas une conséquence normale du vieillissement&nbsp;: vieillir
+             n'implique pas de perdre la mémoire.</p>
+        </div>
+      </article>
+
+      <article class="carte">
+        <div class="carte__media carte__media--modele">
+          <svg viewBox="0 0 64 64" aria-hidden="true">
+            <circle cx="28" cy="28" r="17" fill="none" stroke="currentColor" stroke-width="2.6"/>
+            <path d="M40.5 40.5L54 54" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round"/>
+            <path d="M28 20v9M28 34.5v.6" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <div class="carte__corps">
+          <h3>Les premiers signes</h3>
+          <p>Oublier des événements récents, reposer plusieurs fois la même question,
+             chercher ses mots, se perdre dans un endroit connu, délaisser des activités
+             habituelles. Isolé, aucun de ces signes ne prouve rien&nbsp;: c'est leur
+             répétition dans le temps qui doit amener à consulter.</p>
+        </div>
+      </article>
+
+      <article class="carte">
+        <div class="carte__media carte__media--confiance">
+          <svg viewBox="0 0 64 64" aria-hidden="true">
+            <path d="M32 52S12 41 12 26.5A11.5 11.5 0 0132 19a11.5 11.5 0 0120 7.5C52 41 32 52 32 52z"
+                  fill="none" stroke="currentColor" stroke-width="2.6" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <div class="carte__corps">
+          <h3>Pourquoi consulter tôt</h3>
+          <p>Consulter tôt permet d'écarter d'autres causes, parfois réversibles, de mettre
+             en place un accompagnement et d'organiser la suite pendant que la personne
+             décide encore pour elle-même. Agir sur le mode de vie réduit par ailleurs une
+             partie du risque.</p>
+        </div>
+      </article>
+    </div>
+  </div>
+</section>
+
+{% endblock %}
+
+{% block scripts %}
+<script>window.SEUIL = {{ seuil }};</script>
+<script src="{{ url_for('static', filename='js/outil.js') }}"></script>
+{% endblock %}

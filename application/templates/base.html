@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{% block titre %}CogniSuivi{% endblock %}</title>
+<meta name="description" content="Estimez en une minute le risque d'aggravation des troubles de la mémoire sur deux ans, à partir de votre compte rendu de consultation.">
+<link rel="icon" href="{{ url_for('static', filename='img/favicon.svg') }}" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+<div class="bandeau-haut">
+  <div class="conteneur bandeau-haut__inner">
+    <ul class="bandeau-haut__infos">
+      <li>
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v14H4z" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M4 8h16M9 5v3M15 5v3" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>
+        Horizon de prédiction : 24 mois
+      </li>
+      <li>
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M13 2L5 14h6l-2 8 8-12h-6z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+        Résultat immédiat
+      </li>
+      <li>
+        <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="10.5" width="14" height="10" rx="2" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M8.5 10.5V7.8a3.5 3.5 0 017 0v2.7" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>
+        Aucune donnée saisie n'est conservée
+      </li>
+    </ul>
+    <span class="bandeau-haut__mention">Indicatif — ne remplace pas un avis médical</span>
+  </div>
+</div>
+
+<header class="entete">
+  <div class="conteneur entete__inner">
+    <a class="marque" href="{{ url_for('accueil') }}">
+      <svg class="marque__signe" viewBox="0 0 48 48" aria-hidden="true">
+        <circle cx="24" cy="24" r="22" fill="#0E9188"/>
+        <path d="M30.5 13.5c-5.4-2.4-12 .4-13.4 6-.4 1.6-1.6 2.3-2.7 3.3-1.6 1.5-1.2 3.5.7 4.3.8.3 1 .7.9 1.5-.3 2.6 1 4.1 3.6 4.3.8.1 1.1.4 1.1 1.2 0 2.6 1.3 3.9 4 3.9h3.6"
+              fill="none" stroke="#fff" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M22 20.5h3.2l1.7 4.2 2.2-6.4 1.6 4.3h4.1"
+              fill="none" stroke="#9FE4DF" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <span class="marque__texte">
+        <strong>CogniSuivi</strong>
+        <small>Suivi du risque d'aggravation cognitive</small>
+      </span>
+    </a>
+
+    <input type="checkbox" id="bascule-menu" class="bascule-menu">
+    <label for="bascule-menu" class="bouton-menu" aria-label="Ouvrir le menu">
+      <span></span><span></span><span></span>
+    </label>
+
+    <nav class="navigation">
+      <a href="{{ url_for('accueil') }}" class="actif">Accueil</a>
+      <a href="{{ url_for('accueil') }}#demarche">La démarche</a>
+      <a href="{{ url_for('accueil') }}#comprendre">La maladie</a>
+      <a class="bouton bouton--principal" href="{{ url_for('accueil') }}#outil">Estimer un risque</a>
+    </nav>
+  </div>
+</header>
+
+{% block contenu %}{% endblock %}
+
+<footer class="pied">
+  <div class="conteneur pied__inner pied__inner--court">
+    <div class="pied__bloc">
+      <div class="marque marque--pied">
+        <svg class="marque__signe" viewBox="0 0 48 48" aria-hidden="true">
+          <circle cx="24" cy="24" r="22" fill="#0E9188"/>
+          <path d="M30.5 13.5c-5.4-2.4-12 .4-13.4 6-.4 1.6-1.6 2.3-2.7 3.3-1.6 1.5-1.2 3.5.7 4.3.8.3 1 .7.9 1.5-.3 2.6 1 4.1 3.6 4.3.8.1 1.1.4 1.1 1.2 0 2.6 1.3 3.9 4 3.9h3.6"
+                fill="none" stroke="#fff" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M22 20.5h3.2l1.7 4.2 2.2-6.4 1.6 4.3h4.1"
+                fill="none" stroke="#9FE4DF" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <span class="marque__texte"><strong>CogniSuivi</strong></span>
+      </div>
+      <p>Estimation du risque d'aggravation cognitive à deux ans à partir d'une
+         évaluation clinique courante.</p>
+    </div>
+
+    <div class="pied__bloc">
+      <h3>Navigation</h3>
+      <a href="{{ url_for('accueil') }}">Accueil</a>
+      <a href="{{ url_for('accueil') }}#demarche">La démarche</a>
+      <a href="{{ url_for('accueil') }}#comprendre">La maladie</a>
+      <a href="{{ url_for('accueil') }}#outil">Estimer un risque</a>
+    </div>
+
+    <div class="pied__bloc">
+      <h3>Confidentialité</h3>
+      <p>Les valeurs saisies servent au seul calcul de l'estimation. Elles ne sont ni
+         enregistrées, ni transmises.</p>
+    </div>
+  </div>
+  <div class="pied__bas">
+    <div class="conteneur">
+      <span>Information à visée indicative. N'établit pas de diagnostic et ne remplace
+            pas l'avis d'un médecin.</span>
+    </div>
+  </div>
+</footer>
+
+{% block scripts %}{% endblock %}
+</body>
+</html>
