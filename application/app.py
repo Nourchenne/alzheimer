@@ -178,12 +178,29 @@ def vecteur(donnees, variables):
     return np.array([ligne], dtype=float)
 
 
+def calibrer(p):
+    """Transforme la probabilite brute du modele en probabilite calibree (Platt).
+
+    Le modele est entraine avec class_weight="balanced" : ses probabilites brutes sont gonflees
+    (environ 35 % annonces pour 14 % de risque reel). La calibration, apprise dans le notebook 22,
+    conserve l'ordre des patients mais ramene le pourcentage a un vrai risque.
+    """
+    cal = MODELE.get("calibration")
+    if not cal:
+        return p
+    p = min(max(p, 1e-6), 1 - 1e-6)
+    z = cal["pente"] * math.log(p / (1 - p)) + cal["ordonnee"]
+    return 1 / (1 + math.exp(-z))
+
+
 def probabilite(ligne):
     modele = MODELE["modele"]
     if MODELE["type"] == "Ensemble":
-        return float((modele["logreg"].predict_proba(ligne)[0, 1]
+        brut = float((modele["logreg"].predict_proba(ligne)[0, 1]
                       + modele["foret"].predict_proba(ligne)[0, 1]) / 2)
-    return float(modele.predict_proba(ligne)[0, 1])
+    else:
+        brut = float(modele.predict_proba(ligne)[0, 1])
+    return calibrer(brut)
 
 
 def niveau(p):
