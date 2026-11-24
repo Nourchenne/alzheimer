@@ -47,6 +47,20 @@ application/
     img/                  visuels vectoriels
 ```
 
+## Probabilité et explication
+
+**Probabilité calibrée.** Le modèle est entraîné avec `class_weight="balanced"`, qui gonfle ses
+probabilités brutes. Le notebook 22 apprend une calibration (méthode de Platt, sur des
+prédictions hors échantillon) enregistrée dans le modèle ; `app.py` l'applique avant l'affichage.
+
+**Facteurs du résultat.** Pour une régression logistique, le score est une somme : la contribution
+d'une variable vaut `coefficient × valeur centrée-réduite du patient`. `app.py` (fonction
+`explication`) liste les plus fortes, parmi les champs renseignés, dans « Ce qui augmente le risque »
+et « Ce qui le diminue ». C'est une lecture exacte du calcul, par rapport à un participant moyen.
+Le point de départ (`code_dx`) et le CDR global ne sont pas listés (`NON_LISTES`) : à scores égaux,
+le modèle juge un patient au bilan normal plus à risque, effet réel mais trompeur lu seul. Si le
+modèle exporté n'est plus une régression logistique, l'explication est simplement masquée.
+
 ## Personnalisation
 
 **Le nom.** Remplacer « CogniSuivi » dans `templates/base.html` (en-tête et pied de page)

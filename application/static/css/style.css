@@ -237,6 +237,23 @@ ul{margin:0;padding:0;list-style:none}
 
 .resultat__phrase{font-size:.92rem;line-height:1.6;margin-bottom:1.3rem}
 
+/* ------------------------------------------------------------ facteurs (explication) */
+.facteurs{border-top:1px solid var(--bord);padding-top:1rem;margin:0 0 1.2rem}
+.facteurs__titre{font-size:.9rem;font-weight:600;color:var(--marine);margin:0 0 .6rem}
+.facteurs__groupe{font-size:.78rem;font-weight:600;text-transform:uppercase;letter-spacing:.04em;margin:.8rem 0 .4rem}
+.facteurs__groupe--hausse{color:var(--rouge)}
+.facteurs__groupe--baisse{color:var(--vert)}
+.facteurs ul{list-style:none;margin:0;padding:0}
+.facteur{display:grid;grid-template-columns:1fr auto;gap:.15rem .8rem;align-items:center;padding:.3rem 0}
+.facteur__nom{font-size:.85rem;line-height:1.35}
+.facteur__valeur{font-size:.85rem;font-weight:600;color:var(--marine);text-align:right;white-space:nowrap}
+.facteur__barre{grid-column:1 / -1;height:5px;border-radius:3px;background:var(--fond);overflow:hidden}
+.facteur__barre span{display:block;height:100%;border-radius:3px}
+.facteurs__groupe--hausse + ul .facteur__barre span{background:var(--rouge)}
+.facteurs__groupe--baisse + ul .facteur__barre span{background:var(--vert)}
+.facteurs__aucun{font-size:.85rem;color:var(--texte-doux);margin:0}
+.facteurs__note{font-size:.76rem;color:var(--texte-doux);line-height:1.5;margin:.8rem 0 0}
+
 .resultat__details{margin:0 0 1.2rem;border-top:1px solid var(--bord);padding-top:1rem}
 .resultat__details div{display:flex;justify-content:space-between;gap:1rem;padding:.3rem 0}
 .resultat__details dt{font-size:.86rem;color:var(--texte-doux)}

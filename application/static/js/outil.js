@@ -21,6 +21,56 @@
     boiteErreur.textContent = message;
   }
 
+  var blocFacteurs = document.getElementById("facteurs");
+  var listeFacteurs= document.getElementById("facteurs-liste");
+
+  /* Construit un groupe ("augmente" / "diminue") avec une barre proportionnelle au poids. */
+  function groupe(titre, classe, facteurs, poidsMax) {
+    var fragment = document.createDocumentFragment();
+    var t = document.createElement("p");
+    t.className = "facteurs__groupe facteurs__groupe--" + classe;
+    t.textContent = titre;
+    fragment.appendChild(t);
+    var ul = document.createElement("ul");
+    facteurs.forEach(function (f) {
+      var li = document.createElement("li");
+      li.className = "facteur";
+      var nom = document.createElement("span");
+      nom.className = "facteur__nom";
+      nom.textContent = f.libelle;
+      var valeur = document.createElement("span");
+      valeur.className = "facteur__valeur";
+      valeur.textContent = f.valeur;
+      var barre = document.createElement("span");
+      barre.className = "facteur__barre";
+      var plein = document.createElement("span");
+      plein.style.width = Math.max(8, Math.round(100 * f.poids / poidsMax)) + "%";
+      barre.appendChild(plein);
+      li.appendChild(nom); li.appendChild(valeur); li.appendChild(barre);
+      ul.appendChild(li);
+    });
+    fragment.appendChild(ul);
+    return fragment;
+  }
+
+  function afficherFacteurs(e) {
+    listeFacteurs.textContent = "";
+    if (!e) { blocFacteurs.hidden = true; return; }
+    if (e.hausse.length) {
+      listeFacteurs.appendChild(groupe("Ce qui augmente le risque", "hausse", e.hausse, e.poids_max));
+    }
+    if (e.baisse.length) {
+      listeFacteurs.appendChild(groupe("Ce qui le diminue", "baisse", e.baisse, e.poids_max));
+    }
+    if (!e.hausse.length && !e.baisse.length) {
+      var p = document.createElement("p");
+      p.className = "facteurs__aucun";
+      p.textContent = "Aucun des éléments renseignés ne s'écarte nettement de la moyenne.";
+      listeFacteurs.appendChild(p);
+    }
+    blocFacteurs.hidden = false;
+  }
+
   function afficherResultat(d) {
     vide.hidden = true;
     boiteErreur.hidden = true;
@@ -33,6 +83,7 @@
     niveau.textContent = d.titre;
     niveau.className = "etiquette-niveau " + d.classe;
     phrase.textContent = d.phrase;
+    afficherFacteurs(d.explication);
 
     contenu.scrollIntoView({ block: "nearest", behavior: "smooth" });
   }
@@ -75,6 +126,7 @@
   formulaire.addEventListener("reset", function () {
     contenu.hidden = true;
     boiteErreur.hidden = true;
+    blocFacteurs.hidden = true;
     vide.hidden = false;
   });
 })();

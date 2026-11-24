@@ -203,6 +203,67 @@ def probabilite(ligne):
     return calibrer(brut)
 
 
+# --------------------------------------------------------------------------- explication
+# Le modele final est une regression logistique : le score (en log-cote) est une SOMME
+#     ordonnee + coef_1 * z_1 + ... + coef_k * z_k
+# ou z_i est la valeur du patient centree-reduite (0 = patient moyen de la cohorte).
+# La contribution d'une variable est donc exactement coef_i * z_i : positive, elle pousse le
+# risque vers le haut par rapport a un patient moyen ; negative, vers le bas. C'est une
+# explication exacte du calcul (pas une approximation comme SHAP sur un modele complexe).
+#
+# Le point de depart (bilan normal / trouble leger) et le CDR global ne sont pas listes : a scores
+# egaux, le modele juge un patient au bilan normal PLUS a risque (passer de normal a trouble leger
+# demande un petit declin, passer de trouble leger a demence en demande un gros). Cet effet est
+# reel mais deroutant lu seul ; il est explique par une phrase fixe dans la page.
+NON_LISTES = {"code_dx", "CDR_global"}
+SIGLES = {"MMSE": "MMSE", "CDR_SB": "CDR-SB", "ADAS13": "ADAS", "FAQ": "FAQ", "APOE_e4": "APOE"}
+CONTRIBUTION_MIN = 0.15        # en log-cote : en dessous, l'effet est trop faible pour etre cite
+
+
+def texte_valeur(base, valeur):
+    """Valeur lisible : libelle du choix, ou nombre avec son unite."""
+    champ = CHAMPS[base]
+    if "choix" in champ:
+        for code, libelle in champ["choix"]:
+            if float(code) == float(valeur):
+                return libelle
+    nombre = int(valeur) if float(valeur).is_integer() else valeur
+    unite = champ.get("unite", "")
+    return f"{nombre} {unite}".strip().replace(".", ",")
+
+
+def explication(ligne, donnees):
+    """Facteurs qui ont le plus pese pour CE patient, parmi les champs renseignes.
+
+    Renvoie None si le modele n'est pas une regression logistique (pas de lecture exacte possible).
+    """
+    modele = MODELE["modele"]
+    etapes = getattr(modele, "named_steps", {})
+    if MODELE["type"] != "Regression logistique" or not {"imp", "ech", "clf"} <= set(etapes):
+        return None
+    z = etapes["ech"].transform(etapes["imp"].transform(ligne))[0]
+    contributions = etapes["clf"].coef_[0] * z
+
+    hausse, baisse = [], []
+    for v, c in zip(FICHE["variables"], contributions):
+        base, marque = decomposer(v)
+        if v not in donnees or base in NON_LISTES or base not in CHAMPS or abs(c) < CONTRIBUTION_MIN:
+            continue
+        libelle = CHAMPS[base]["libelle"]
+        if base in SIGLES:
+            libelle += f" ({SIGLES[base]})"
+        if isinstance(marque, int):
+            libelle += f", consultation {marque}"
+        facteur = {"libelle": libelle, "valeur": texte_valeur(base, donnees[v]),
+                   "poids": round(float(abs(c)), 3)}
+        (hausse if c > 0 else baisse).append(facteur)
+
+    hausse.sort(key=lambda f: -f["poids"])
+    baisse.sort(key=lambda f: -f["poids"])
+    return {"hausse": hausse[:4], "baisse": baisse[:3],
+            "poids_max": max([f["poids"] for f in hausse[:4] + baisse[:3]], default=1.0)}
+
+
 def niveau(p):
     """Trois paliers de lecture, construits autour du seuil retenu."""
     if p < SEUIL * 0.6:
@@ -266,7 +327,8 @@ def api_prediction():
     if not donnees:
         return jsonify({"erreur": "Renseignez au moins une information pour lancer le calcul."}), 400
 
-    p = probabilite(vecteur(donnees, FICHE["variables"]))
+    ligne = vecteur(donnees, FICHE["variables"])
+    p = probabilite(ligne)
     classe, titre, phrase = niveau(p)
     total = len([v for v in FICHE["variables"] if decomposer(v)[1] != "pente"])
     return jsonify({
@@ -279,6 +341,7 @@ def api_prediction():
         "phrase": phrase,
         "renseignes": len(donnees),
         "total": total,
+        "explication": explication(ligne, donnees),
     })
 
 
