@@ -211,11 +211,20 @@ def probabilite(ligne):
 # risque vers le haut par rapport a un patient moyen ; negative, vers le bas. C'est une
 # explication exacte du calcul (pas une approximation comme SHAP sur un modele complexe).
 #
-# Le point de depart (bilan normal / trouble leger) et le CDR global ne sont pas listes : a scores
-# egaux, le modele juge un patient au bilan normal PLUS a risque (passer de normal a trouble leger
-# demande un petit declin, passer de trouble leger a demence en demande un gros). Cet effet est
-# reel mais deroutant lu seul ; il est explique par une phrase fixe dans la page.
-NON_LISTES = {"code_dx", "CDR_global"}
+# Le point de depart (bilan normal / trouble leger) est liste avec un libelle qui dit ce qu'il signifie :
+# a scores egaux, le modele juge un patient au bilan normal PLUS a risque. Verifie sur les donnees
+# (771 patients, predictions hors echantillon) : avec ADAS 9-15 et CDR-SB 0,5-1, 11 % des patients au
+# bilan normal s'aggravent contre 3 % des troubles legers. Ces scores sont inhabituels pour un bilan
+# normal (moyennes : ADAS 8,6 ; CDR-SB 0,05) mais habituels, voire bons, pour un trouble leger
+# (ADAS 15,7 ; CDR-SB 1,5) ; et passer de normal a trouble leger demande un plus petit declin.
+# Le CDR global n'est pas liste : son effet propre est tres faible et de sens trompeur (il double le CDR-SB).
+NON_LISTES = {"CDR_global"}
+# L'effet du point de depart est le meme pour tous les patients d'un groupe (il ne depend pas des
+# scores) : le libelle dit donc seulement ce que le modele en retient, vrai dans tous les cas.
+LIBELLES_DEPART = {
+    1: "Bilan noté normal : un faible déclin suffit pour changer de stade",
+    2: "Trouble léger déjà constaté : passer au stade suivant demande un déclin plus marqué",
+}
 SIGLES = {"MMSE": "MMSE", "CDR_SB": "CDR-SB", "ADAS13": "ADAS", "FAQ": "FAQ", "APOE_e4": "APOE"}
 CONTRIBUTION_MIN = 0.15        # en log-cote : en dessous, l'effet est trop faible pour etre cite
 
@@ -250,11 +259,14 @@ def explication(ligne, donnees):
         if v not in donnees or base in NON_LISTES or base not in CHAMPS or abs(c) < CONTRIBUTION_MIN:
             continue
         libelle = CHAMPS[base]["libelle"]
+        if base == "code_dx":
+            libelle = LIBELLES_DEPART.get(int(donnees[v]), libelle)
         if base in SIGLES:
             libelle += f" ({SIGLES[base]})"
         if isinstance(marque, int):
             libelle += f", consultation {marque}"
-        facteur = {"libelle": libelle, "valeur": texte_valeur(base, donnees[v]),
+        valeur = "" if base == "code_dx" else texte_valeur(base, donnees[v])
+        facteur = {"libelle": libelle, "valeur": valeur,
                    "poids": round(float(abs(c)), 3)}
         (hausse if c > 0 else baisse).append(facteur)
 

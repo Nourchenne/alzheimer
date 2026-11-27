@@ -57,9 +57,14 @@ prédictions hors échantillon) enregistrée dans le modèle ; `app.py` l'appliq
 d'une variable vaut `coefficient × valeur centrée-réduite du patient`. `app.py` (fonction
 `explication`) liste les plus fortes, parmi les champs renseignés, dans « Ce qui augmente le risque »
 et « Ce qui le diminue ». C'est une lecture exacte du calcul, par rapport à un participant moyen.
-Le point de départ (`code_dx`) et le CDR global ne sont pas listés (`NON_LISTES`) : à scores égaux,
-le modèle juge un patient au bilan normal plus à risque, effet réel mais trompeur lu seul. Si le
-modèle exporté n'est plus une régression logistique, l'explication est simplement masquée.
+Le point de départ (`code_dx`) est listé avec un libellé explicite (`LIBELLES_DEPART`) : à scores
+égaux, le modèle juge un patient au bilan normal plus à risque, car un faible déclin suffit pour
+passer de « normal » à « trouble léger ». Vérifié sur les 771 patients (prédictions hors
+échantillon) : avec ADAS 9-15 et CDR-SB 0,5-1, 11 % des patients au bilan normal s'aggravent,
+contre 3 % des troubles légers. La calibration est juste dans chaque groupe (normaux : 9,1 %
+prédits / 8,3 % observés ; troubles légers : 19,4 % / 20,2 %). Le CDR global n'est pas listé
+(`NON_LISTES`) : son effet propre est très faible. Si le modèle exporté n'est plus une régression
+logistique, l'explication est simplement masquée.
 
 ## Personnalisation
 
