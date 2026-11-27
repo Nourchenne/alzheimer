@@ -178,12 +178,102 @@ def vecteur(donnees, variables):
     return np.array([ligne], dtype=float)
 
 
+def calibrer(p):
+    """Transforme la probabilite brute du modele en probabilite calibree (Platt).
+
+    Le modele est entraine avec class_weight="balanced" : ses probabilites brutes sont gonflees
+    (environ 35 % annonces pour 14 % de risque reel). La calibration, apprise dans le notebook 22,
+    conserve l'ordre des patients mais ramene le pourcentage a un vrai risque.
+    """
+    cal = MODELE.get("calibration")
+    if not cal:
+        return p
+    p = min(max(p, 1e-6), 1 - 1e-6)
+    z = cal["pente"] * math.log(p / (1 - p)) + cal["ordonnee"]
+    return 1 / (1 + math.exp(-z))
+
+
 def probabilite(ligne):
     modele = MODELE["modele"]
     if MODELE["type"] == "Ensemble":
-        return float((modele["logreg"].predict_proba(ligne)[0, 1]
+        brut = float((modele["logreg"].predict_proba(ligne)[0, 1]
                       + modele["foret"].predict_proba(ligne)[0, 1]) / 2)
-    return float(modele.predict_proba(ligne)[0, 1])
+    else:
+        brut = float(modele.predict_proba(ligne)[0, 1])
+    return calibrer(brut)
+
+
+# --------------------------------------------------------------------------- explication
+# Le modele final est une regression logistique : le score (en log-cote) est une SOMME
+#     ordonnee + coef_1 * z_1 + ... + coef_k * z_k
+# ou z_i est la valeur du patient centree-reduite (0 = patient moyen de la cohorte).
+# La contribution d'une variable est donc exactement coef_i * z_i : positive, elle pousse le
+# risque vers le haut par rapport a un patient moyen ; negative, vers le bas. C'est une
+# explication exacte du calcul (pas une approximation comme SHAP sur un modele complexe).
+#
+# Le point de depart (bilan normal / trouble leger) est liste avec un libelle qui dit ce qu'il signifie :
+# a scores egaux, le modele juge un patient au bilan normal PLUS a risque. Verifie sur les donnees
+# (771 patients, predictions hors echantillon) : avec ADAS 9-15 et CDR-SB 0,5-1, 11 % des patients au
+# bilan normal s'aggravent contre 3 % des troubles legers. Ces scores sont inhabituels pour un bilan
+# normal (moyennes : ADAS 8,6 ; CDR-SB 0,05) mais habituels, voire bons, pour un trouble leger
+# (ADAS 15,7 ; CDR-SB 1,5) ; et passer de normal a trouble leger demande un plus petit declin.
+# Le CDR global n'est pas liste : son effet propre est tres faible et de sens trompeur (il double le CDR-SB).
+NON_LISTES = {"CDR_global"}
+# L'effet du point de depart est le meme pour tous les patients d'un groupe (il ne depend pas des
+# scores) : le libelle dit donc seulement ce que le modele en retient, vrai dans tous les cas.
+LIBELLES_DEPART = {
+    1: "Bilan noté normal : un faible déclin suffit pour changer de stade",
+    2: "Trouble léger déjà constaté : passer au stade suivant demande un déclin plus marqué",
+}
+SIGLES = {"MMSE": "MMSE", "CDR_SB": "CDR-SB", "ADAS13": "ADAS", "FAQ": "FAQ", "APOE_e4": "APOE"}
+CONTRIBUTION_MIN = 0.15        # en log-cote : en dessous, l'effet est trop faible pour etre cite
+
+
+def texte_valeur(base, valeur):
+    """Valeur lisible : libelle du choix, ou nombre avec son unite."""
+    champ = CHAMPS[base]
+    if "choix" in champ:
+        for code, libelle in champ["choix"]:
+            if float(code) == float(valeur):
+                return libelle
+    nombre = int(valeur) if float(valeur).is_integer() else valeur
+    unite = champ.get("unite", "")
+    return f"{nombre} {unite}".strip().replace(".", ",")
+
+
+def explication(ligne, donnees):
+    """Facteurs qui ont le plus pese pour CE patient, parmi les champs renseignes.
+
+    Renvoie None si le modele n'est pas une regression logistique (pas de lecture exacte possible).
+    """
+    modele = MODELE["modele"]
+    etapes = getattr(modele, "named_steps", {})
+    if MODELE["type"] != "Regression logistique" or not {"imp", "ech", "clf"} <= set(etapes):
+        return None
+    z = etapes["ech"].transform(etapes["imp"].transform(ligne))[0]
+    contributions = etapes["clf"].coef_[0] * z
+
+    hausse, baisse = [], []
+    for v, c in zip(FICHE["variables"], contributions):
+        base, marque = decomposer(v)
+        if v not in donnees or base in NON_LISTES or base not in CHAMPS or abs(c) < CONTRIBUTION_MIN:
+            continue
+        libelle = CHAMPS[base]["libelle"]
+        if base == "code_dx":
+            libelle = LIBELLES_DEPART.get(int(donnees[v]), libelle)
+        if base in SIGLES:
+            libelle += f" ({SIGLES[base]})"
+        if isinstance(marque, int):
+            libelle += f", consultation {marque}"
+        valeur = "" if base == "code_dx" else texte_valeur(base, donnees[v])
+        facteur = {"libelle": libelle, "valeur": valeur,
+                   "poids": round(float(abs(c)), 3)}
+        (hausse if c > 0 else baisse).append(facteur)
+
+    hausse.sort(key=lambda f: -f["poids"])
+    baisse.sort(key=lambda f: -f["poids"])
+    return {"hausse": hausse[:4], "baisse": baisse[:3],
+            "poids_max": max([f["poids"] for f in hausse[:4] + baisse[:3]], default=1.0)}
 
 
 def niveau(p):
@@ -237,6 +327,11 @@ def api_prediction():
         except ValueError:
             invalides.append(CHAMPS[base]["libelle"])
             continue
+        if "choix" in CHAMPS[base]:
+            permis = [float(code) for code, _ in CHAMPS[base]["choix"]]
+            if valeur not in permis:          # ex. code_dx=3 (demence) : hors du champ du modele
+                invalides.append(f"{CHAMPS[base]['libelle']} (valeur non proposée)")
+                continue
         borne_bas, borne_haut = CHAMPS[base].get("min"), CHAMPS[base].get("max")
         if borne_bas is not None and not (borne_bas <= valeur <= borne_haut):
             invalides.append(f"{CHAMPS[base]['libelle']} (attendu entre "
@@ -249,7 +344,8 @@ def api_prediction():
     if not donnees:
         return jsonify({"erreur": "Renseignez au moins une information pour lancer le calcul."}), 400
 
-    p = probabilite(vecteur(donnees, FICHE["variables"]))
+    ligne = vecteur(donnees, FICHE["variables"])
+    p = probabilite(ligne)
     classe, titre, phrase = niveau(p)
     total = len([v for v in FICHE["variables"] if decomposer(v)[1] != "pente"])
     return jsonify({
@@ -262,6 +358,7 @@ def api_prediction():
         "phrase": phrase,
         "renseignes": len(donnees),
         "total": total,
+        "explication": explication(ligne, donnees),
     })
 
 

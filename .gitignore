@@ -60,3 +60,6 @@ Thumbs.db
 
 __pycache__/
 application/modele/*.joblib
+# Documents de passation entre membres du binome (restent en local)
+docs/*.md
+docs/*.docx

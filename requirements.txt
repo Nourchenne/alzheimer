@@ -1,5 +1,6 @@
-pandas
+pandas<3
 numpy
+scipy
 scikit-learn
 SimpleITK
 pydicom
@@ -7,3 +8,12 @@ matplotlib
 openpyxl
 nbstripout
 jupyterlab
+ipykernel
+nibabel
+nilearn
+antspyx
+joblib
+flask
+pyspark
+# PyTorch : installer la version adaptee a la machine (GPU : https://pytorch.org/get-started/locally/)
+torch
