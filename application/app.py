@@ -327,6 +327,11 @@ def api_prediction():
         except ValueError:
             invalides.append(CHAMPS[base]["libelle"])
             continue
+        if "choix" in CHAMPS[base]:
+            permis = [float(code) for code, _ in CHAMPS[base]["choix"]]
+            if valeur not in permis:          # ex. code_dx=3 (demence) : hors du champ du modele
+                invalides.append(f"{CHAMPS[base]['libelle']} (valeur non proposée)")
+                continue
         borne_bas, borne_haut = CHAMPS[base].get("min"), CHAMPS[base].get("max")
         if borne_bas is not None and not (borne_bas <= valeur <= borne_haut):
             invalides.append(f"{CHAMPS[base]['libelle']} (attendu entre "
